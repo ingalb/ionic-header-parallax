@@ -1,9 +1,9 @@
-import { Directive, ElementRef, Input, Renderer2, AfterViewInit } from '@angular/core';
+import { Directive, ElementRef, Input, Renderer2, AfterViewInit, AfterViewChecked } from '@angular/core';
 
 @Directive({
   selector: 'ion-header[parallax]'
 })
-export class ParallaxDirective implements AfterViewInit {
+export class ParallaxDirective implements AfterViewInit, AfterViewChecked {
   @Input() imageUrl: string;
   @Input() expandedColor: string;
   @Input() titleColor: string;
@@ -28,6 +28,7 @@ export class ParallaxDirective implements AfterViewInit {
   ionTitle: HTMLElement;
   overlayButtons: HTMLElement[];
   scrollContentPaddingTop;
+  imageUrlUpdated: string;
 
   constructor(public headerRef: ElementRef<HTMLElement>, public renderer: Renderer2) {
   }
@@ -38,6 +39,16 @@ export class ParallaxDirective implements AfterViewInit {
       this.initStyles();
       this.initEvents();
     }, 100);
+  }
+  
+  ngAfterViewChecked(): void {
+    if(this.imageUrlUpdated===this.imageUrl){
+       console.log("No changes");
+    }
+    else{
+        this.renderer.setStyle(this.imageOverlay, 'background-image', `url(${this.imageUrl || ''})`);
+        this.imageUrlUpdated=this.imageUrl;
+    }
   }
 
   initElements() {
@@ -81,6 +92,7 @@ export class ParallaxDirective implements AfterViewInit {
   initStyles() {
     this.headerHeight = this.scrollContent.clientHeight;
     this.ticking = false;
+    this.imageUrlUpdated=this.imageUrl;
 
     if (!this.scrollContent || !toolbar) { return; }
 
